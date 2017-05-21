@@ -159,7 +159,7 @@ function checkSquares(){
 		else{
 		    foundSquare =checkSquare([corner1.x,corner1.y],
 					     [corner2.x,corner2.y],
-					     side,moveBoard,1);
+					     side,moveBoard,-1);
 		}
 	    }
 	}
@@ -183,14 +183,14 @@ function checkSquare(pos1,pos2,side,moveBoard,color){
 	&& pos6[1]>=0 && pos6[1]<curDimension;
     if(p3exists && p4exists){
 	if (moveBoard[pos3[0]][pos3[1]]==color &&
-	    moveBoard[pos3[0]][pos3[1]]==moveBoard[pos4[0]][pos4[1]]){
+	    moveBoard[pos4[0]][pos4[1]]==color){
 	    markWon([pos1,pos2,pos3,pos4]);
 	    return true;
 	}
     }
     if(p5exists && p6exists){
 	if (moveBoard[pos5[0]][pos5[1]]==color &&
-	    moveBoard[pos5[0]][pos5[1]]==moveBoard[pos6[0]][pos6[1]])
+	   moveBoard[pos6[0]][pos6[1]]==color)
 	{
 	    markWon([pos1,pos2,pos5,pos6]);
 	    return true;
