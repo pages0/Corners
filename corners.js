@@ -9,29 +9,53 @@ var dimensions = [3,4,5,6,7,8,9];
 var curDimension=5;
 displayBoard(curDimension);
 var nextDimension=5;
+var rules = ["any size", "not all touching", "no touching"];
+var currentRule = 0;
+var nextRule =0;
 
-var dropdown =d3.select('#dimensions')
+d3.select('#dimensions')
   .append('select')
   .attr('id','dimension')
   .on('change',function() {
       nextDimension =d3.select(this).node().value;
-  });
+  }).selectAll('option')
+    .data(dimensions)
+    .enter()
+    .append('option')
+    .attr('id',function(d){return 'dimOption'+d;})
+    .attr('value', function(d){
+	return d;
+    }).text(function(d){
+	return d+"";
+    });
 
-dropdown.selectAll('option')
-  .data(dimensions)
-  .enter()
-  .append('option')
-  .attr('value', function(d){
-    return d;
-  }).text(function(d){
-    return d+"";
-  });
+d3.select('#dimOption'+curDimension).attr('selected','true');
+
+d3.select('#squareSizes')
+    .append('select')
+    .attr('id','squareSize')
+    .on('change',function(){
+	console.log(d3.select(this).node().value);	
+	nextRule =d3.select(this).node().value;
+    }).selectAll('option')
+    .data(rules)
+    .enter()
+    .append('option')
+    .attr('id',function(d,i){return 'squareSize'+i;})
+    .attr('value', function(d,i){	
+	return i;
+    }).text(function(d){
+	return d;
+    })
+
+d3.select('#squareSize'+currentRule).attr('selected','true');
 
 function clearBoard()
 {
     done =false;
     board = [];
     moves=[];
+    currentRule=nextRule;
     curDimension = nextDimension;
     whiteTurn =true;
     displayBoard(curDimension);
@@ -151,7 +175,7 @@ function checkSquares(){
 	    if (corner1.color == corner2.color){
 		side = [corner1.x-corner2.x,
 			corner1.y-corner2.y]
-		if(corner2.color){
+		if(corner2.color && sideLongEnough(side)){
 		    foundSquare =checkSquare([corner1.x,corner1.y],
 					     [corner2.x,corner2.y],
 					     side,moveBoard,1);
@@ -203,6 +227,21 @@ function markWon(positionArray){
     for (pos of positionArray){
 	board[pos[0]+pos[1]*curDimension].win=true;
   }
+}
+
+function sideLongEnough(side){
+    if(currentRule==0){
+	return true;	
+    }
+    else if(currentRule==1){
+	console.log("teststart");
+	console.log(Math.abs(side[0])+Math.abs(side[1])>1);
+	console.log("testend");
+	return (Math.abs(side[0])+Math.abs(side[1]))>1;
+    }
+    else{
+	return Math.abs(side[0])>1 || Math.abs(side[1])>1;
+    }
 }
 
 function undo()
