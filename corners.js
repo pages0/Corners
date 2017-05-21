@@ -211,7 +211,6 @@ function checkSquare(pos1,pos2,side,moveBoard,color){
     p6exists = pos6[0]>=0 && pos6[0]<curDimension
 	&& pos6[1]>=0 && pos6[1]<curDimension;
     if(p3exists && p4exists){
-	markCheck([pos1,pos2,pos3,pos4],moveBoard,color);
 	if (moveBoard[pos3[0]][pos3[1]]==color &&
 	    moveBoard[pos4[0]][pos4[1]]==color){
 	    markWon([pos1,pos2,pos3,pos4]);
@@ -219,7 +218,6 @@ function checkSquare(pos1,pos2,side,moveBoard,color){
 	}
     }
     if(p5exists && p6exists){
-	markCheck([pos1,pos2,pos3,pos4],moveBoard,color);
 	if (moveBoard[pos5[0]][pos5[1]]==color &&
 	    moveBoard[pos6[0]][pos6[1]]==color)
 	{
@@ -265,8 +263,3 @@ function undo()
     updateBoard();
 }
 
-function markCheck(corners,moveBoard,color){
-    if (markingCheckSelected){
-	
-    }
-}
