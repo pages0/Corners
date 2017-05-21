@@ -119,7 +119,7 @@ function displayBoard(dimension){
 }
 
 function updateBoard(){
-	for (var i=0;i<curDimension; i++)
+    for (var i=0;i<curDimension; i++)
     {
 	for (var j=0;j<curDimension; j++)
 	{
@@ -143,7 +143,16 @@ function updateBoard(){
 	    
 	}
     }
-    
+    if(done){
+	d3.select('#svg-title').text("Game over");
+    }
+    else if (whiteTurn){
+	d3.select('#svg-title').text("White's Turn");
+    }
+    else
+    {
+	d3.select('#svg-title').text("Black's Turn");
+    }
 }
 
 
