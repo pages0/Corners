@@ -210,5 +210,11 @@ function undo()
     var lastsquare =moves.pop();
     board[lastsquare.x +lastsquare.y*curDimension].piece="empty";
     whiteTurn=!whiteTurn;
+    if (done){
+	for(square of board){
+	    square.win=false;
+	}
+    }
+    done =false;
     updateBoard();
 }
