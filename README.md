@@ -1,2 +1,2 @@
 # Corners
-My Implementation of a game Invented by Professor Marc Chamberland of Grinnell College
+My implementation of a game invented by Professor Marc Chamberland of Grinnell College
