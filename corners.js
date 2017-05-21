@@ -6,9 +6,9 @@ var whiteTurn =true;
 var squareSize =50;
 
 var dimensions = [3,4,5,6,7,8,9];
-var curDimension=3;
+var curDimension=5;
 displayBoard(curDimension);
-var nextDimension=3;
+var nextDimension=5;
 
 var dropdown =d3.select('#dimensions')
   .append('select')
@@ -203,4 +203,12 @@ function markWon(positionArray){
     for (pos of positionArray){
 	board[pos[0]+pos[1]*curDimension].win=true;
   }
+}
+
+function undo()
+{
+    var lastsquare =moves.pop();
+    board[lastsquare.x +lastsquare.y*curDimension].piece="empty";
+    whiteTurn=!whiteTurn;
+    updateBoard();
 }
