@@ -16,6 +16,21 @@ var nextRule =0;
 
 displayBoard(curDimension);
 
+var config = d3.select("#otherSettings");
+
+var showMoveIds =true;
+config.append('label')
+    .attr('for', 'showMoves')
+    .text("Show Move Numbers")
+config.append('input')
+  .attr('type', 'checkbox')
+  .attr('checked', showMoveIds)
+  .attr('id', 'showMoves')
+  .on('change', function() {
+      showMoveIds = this.checked;
+      updateBoard();
+  });
+
 d3.select('#dimensions')
     .append('input')
     .attr('id','dimension')
@@ -99,6 +114,7 @@ function displayBoard(dimension){
 	.attr('id',function(d){return "circle"+d.x+"-"+d.y;})
 	.on('click',function(d){
 	    if (d.piece=="empty" && !done){
+		d.moveId = moves.length;
 		if(whiteTurn){
 		    d.piece ="white";
 		    moves.push({x:d.x,y:d.y,color:true});
@@ -112,6 +128,16 @@ function displayBoard(dimension){
 		updateBoard();
 	    }
 	});
+
+    svg.selectAll('text')
+	.data(board)
+	.enter()
+	.append('text')
+	.attr('x',function(d){ return d.x*squareSize + 0.5*squareSize;})
+	.attr('y',function(d){ return d.y*squareSize + 0.5*squareSize;})
+	.attr('text-anchor', 'middle')
+	.attr('dominant-baseline', 'middle')
+	.attr('id',function(d){return "text"+d.x+"-"+d.y;});
 }
 
 function updateBoard(){
@@ -135,10 +161,30 @@ function updateBoard(){
 	    else{
 		d3.select("#circle"+square.x+"-"+square.y)
 		    .style('fill','green');
+		d3.select("#text"+square.x+"-"+square.y)
+		    .text("")
 	    }
-	    
+
+            if (showMoveIds) {
+                if (square.piece != "empty") {
+                    var invertedColor;
+                    if (square.piece == 'white') {
+                        invertedColor = 'black';
+                    } else {
+                        invertedColor = 'white';
+                    }
+                    d3.select("#text"+square.x+"-"+square.y)
+                      .style('fill', invertedColor)
+                      .text(square.moveId + 1);
+                }
+	    }
+	    else {
+                d3.select("#text"+square.x+"-"+square.y)
+		    .text("")	    
+	    }
 	}
     }
+    
     if(done){
 	d3.select('#svg-title').text("Game over");
     }
@@ -148,7 +194,7 @@ function updateBoard(){
     else
     {
 	d3.select('#svg-title').text("Black's Turn");
-    }
+    }    
 }
 
 
@@ -185,7 +231,7 @@ function checkSquares(){
 					     [corner2.x,corner2.y],
 					     side,moveBoard,1);
 		}
-		else{
+		else if (sideLongEnough(side)){
 		    foundSquare =checkSquare([corner1.x,corner1.y],
 					     [corner2.x,corner2.y],
 					     side,moveBoard,-1);
