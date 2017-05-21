@@ -21,7 +21,7 @@ var config = d3.select("#otherSettings");
 var showMoveIds =true;
 config.append('label')
     .attr('for', 'showMoves')
-    .text("Show Move Numbers")
+    .text("Show Move Numbers");
 config.append('input')
   .attr('type', 'checkbox')
   .attr('checked', showMoveIds)
@@ -30,6 +30,20 @@ config.append('input')
       showMoveIds = this.checked;
       updateBoard();
   });
+var showChecks = true;
+
+config.append('label')
+    .attr('for', 'showMoves')
+    .text("Show Forced Squares");
+config.append('input')
+  .attr('type', 'checkbox')
+  .attr('checked', showChecks)
+  .attr('id', 'showMoves')
+  .on('change', function() {
+      showChecks = this.checked;
+      updateBoard();
+  });
+
 
 d3.select('#dimensions')
     .append('input')
@@ -146,21 +160,34 @@ function updateBoard(){
 	for (var j=0;j<curDimension; j++)
 	{
 	    var square = board[i*curDimension+j];
+	    var fillColor;
 	    if(square.win){
 		d3.select("#square"+square.x+"-"+square.y)
-		    .style('fill','red');
+		    .style('fill', 'red');
+	    }
+	    else if (showChecks && !done &&
+		     square.check && square.piece == "empty")
+	    {
+                d3.select("#square"+square.x+"-"+square.y)
+                    .style('fill', 'yellow');
 	    }
 	    else{
 		d3.select("#square"+square.x+"-"+square.y)
-		    .style('fill','green');
+		    .style('fill', 'green');
 	    }
 	    if (square.piece!="empty"){
 		d3.select("#circle"+square.x+"-"+square.y)
 		    .style('fill',square.piece);
 	    }
 	    else{
-		d3.select("#circle"+square.x+"-"+square.y)
-		    .style('fill','green');
+		if (showChecks && !done && square.check) {
+                    d3.select("#circle"+square.x+"-"+square.y)
+                      .style('fill', 'yellow');
+                } else {
+                    d3.select("#circle"+square.x+"-"+square.y)
+                      .style('fill','green');
+                }
+
 		d3.select("#text"+square.x+"-"+square.y)
 		    .text("")
 	    }
@@ -227,12 +254,12 @@ function checkSquares(){
 		side = [corner1.x-corner2.x,
 			corner1.y-corner2.y]
 		if(corner2.color && sideLongEnough(side)){
-		    foundSquare =checkSquare([corner1.x,corner1.y],
+		    foundSquare |= checkSquare([corner1.x,corner1.y],
 					     [corner2.x,corner2.y],
 					     side,moveBoard,1);
 		}
 		else if (sideLongEnough(side)){
-		    foundSquare =checkSquare([corner1.x,corner1.y],
+		    foundSquare |= checkSquare([corner1.x,corner1.y],
 					     [corner2.x,corner2.y],
 					     side,moveBoard,-1);
 		}
@@ -248,36 +275,53 @@ function checkSquare(pos1,pos2,side,moveBoard,color){
     var pos4 = [pos2[0]+side[1],pos2[1]-side[0]];
     var pos5 = [pos1[0]-side[1],pos1[1]+side[0]];
     var pos6 = [pos2[0]-side[1],pos2[1]+side[0]];
-    p3exists = pos3[0]>=0 && pos3[0]<curDimension
+    var p3exists = pos3[0]>=0 && pos3[0]<curDimension
 	&& pos3[1]>=0 && pos3[1]<curDimension;
-    p4exists = pos4[0]>=0 && pos4[0]<curDimension
+    var p3good =p3exists && moveBoard[pos3[0]][pos3[1]] == color;
+    var p4exists = pos4[0]>=0 && pos4[0]<curDimension
 	&& pos4[1]>=0 && pos4[1]<curDimension;
-    p5exists = pos5[0]>0 && pos5[0]<curDimension
+    var p4good = p4exists && moveBoard[pos4[0]][pos4[1]] == color;
+    var p5exists = pos5[0]>0 && pos5[0]<curDimension
 	&& pos5[1]>=0 && pos5[1]<curDimension;
-    p6exists = pos6[0]>=0 && pos6[0]<curDimension
+    var p5good = p5exists && moveBoard[pos5[0]][pos5[1]] == color;
+    var p6exists = pos6[0]>=0 && pos6[0]<curDimension
 	&& pos6[1]>=0 && pos6[1]<curDimension;
+    var p6good = p6exists && moveBoard[pos6[0]][pos6[1]] == color;
     if(p3exists && p4exists){
-	if (moveBoard[pos3[0]][pos3[1]]==color &&
-	    moveBoard[pos4[0]][pos4[1]]==color){
-	    markWon([pos1,pos2,pos3,pos4]);
+        if (p3good && p4good) {
+            pieceAt(pos1).win = true;
+            pieceAt(pos2).win = true;
+            pieceAt(pos3).win = true;
+            pieceAt(pos4).win = true;
 	    return true;
 	}
+	else if (p3good) {
+            pieceAt(pos4).check = true;
+        }
+	else if (p4good) {
+            pieceAt(pos3).check = true;
+        }
     }
     if(p5exists && p6exists){
-	if (moveBoard[pos5[0]][pos5[1]]==color &&
-	    moveBoard[pos6[0]][pos6[1]]==color)
-	{
-	    markWon([pos1,pos2,pos5,pos6]);
+	if (p5good && p6good) {
+            pieceAt(pos1).win = true;
+            pieceAt(pos2).win = true;
+            pieceAt(pos5).win = true;
+            pieceAt(pos6).win = true;
 	    return true;
-	}	
+	}
+	else if (p5good) {
+            pieceAt(pos6).check = true;
+        }
+	else if (p6good) {
+            pieceAt(pos5).check = true;
+        }
     }
     return false;
 }
 
-function markWon(positionArray){
-    for (pos of positionArray){
-	board[pos[0]+pos[1]*curDimension].win=true;
-    }
+function pieceAt(pos) {
+    return board[pos[0] + pos[1]*curDimension];
 }
 
 function sideLongEnough(side){
@@ -300,12 +344,13 @@ function undo()
     var lastsquare =moves.pop();
     board[lastsquare.x +lastsquare.y*curDimension].piece="empty";
     whiteTurn=!whiteTurn;
-    if (done){
-	for(square of board){
-	    square.win=false;
-	}
+    for(square of board){
+	square.win=false;
+	square.check=false;
     }
+    
     done =false;
+    checkSquares();
     updateBoard();
 }
 
