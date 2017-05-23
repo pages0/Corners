@@ -281,7 +281,7 @@ function checkSquare(pos1,pos2,side,moveBoard,color){
     var p4exists = pos4[0]>=0 && pos4[0]<curDimension
 	&& pos4[1]>=0 && pos4[1]<curDimension;
     var p4good = p4exists && moveBoard[pos4[0]][pos4[1]] == color;
-    var p5exists = pos5[0]>0 && pos5[0]<curDimension
+    var p5exists = pos5[0]>=0 && pos5[0]<curDimension
 	&& pos5[1]>=0 && pos5[1]<curDimension;
     var p5good = p5exists && moveBoard[pos5[0]][pos5[1]] == color;
     var p6exists = pos6[0]>=0 && pos6[0]<curDimension
