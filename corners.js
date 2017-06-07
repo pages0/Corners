@@ -3,6 +3,9 @@ var moves=[];
 
 var done =false;
 var whiteTurn =true;
+var AIColor = false;
+//false means black, true means white
+// Will be used in the statement AIColor == whiteTurn
 var squareSize =50;
 
 var dimensions = [3,4,5,6,7,8,9];
@@ -33,16 +36,34 @@ config.append('input')
 var showChecks = true;
 
 config.append('label')
-    .attr('for', 'showMoves')
+    .attr('for', 'showChecks')
     .text("Show Forced Squares");
 config.append('input')
   .attr('type', 'checkbox')
   .attr('checked', showChecks)
-  .attr('id', 'showMoves')
+  .attr('id', 'showChecks')
   .on('change', function() {
       showChecks = this.checked;
       updateBoard();
   });
+var playAI = true;
+
+config.append('label')
+    .attr('for', 'playAI')
+    .text("Play Against AI");
+config.append('input')
+  .attr('type', 'checkbox')
+  .attr('checked', playAI)
+  .attr('id', 'playAI')
+  .on('change', function() {
+      playAI = this.checked;
+      if (playAI)
+      {
+	  AIColor = !whiteTurn;
+      }
+      updateBoard();
+  });
+
 
 
 d3.select('#dimensions')
@@ -84,6 +105,7 @@ function clearBoard()
     curDimension = nextDimension;
     whiteTurn =true;
     displayBoard(curDimension);
+    updateBoard();
 }
 
 function displayBoard(dimension){
@@ -138,6 +160,11 @@ function displayBoard(dimension){
 		    moves.push({x:d.x,y:d.y,color:false});
 		}
 		whiteTurn = !whiteTurn;
+		checkSquares();
+		//AI move Here
+		if (playAI){
+		    AIMove();
+		}
 		checkSquares();
 		updateBoard();
 	    }
@@ -329,9 +356,6 @@ function sideLongEnough(side){
 	return true;	
     }
     else if(currentRule==1){
-	console.log("teststart");
-	console.log(Math.abs(side[0])+Math.abs(side[1])>1);
-	console.log("testend");
 	return (Math.abs(side[0])+Math.abs(side[1]))>1;
     }
     else{
@@ -354,3 +378,19 @@ function undo()
     updateBoard();
 }
 
+
+function AIMove(){
+    if (AIColor == whiteTurn && !done)
+    {
+	var move = AIMoveSearch(board,moves,curDimension,AIColor);
+	moves.push(move);
+	if (AIColor){
+	    pieceAt([move.x,move.y]).piece ="white"
+	}
+	else{
+	    pieceAt([move.x,move.y]).piece ="black"
+	}
+	pieceAt([move.x,move.y]).moveId =moves.length;
+	whiteTurn = !whiteTurn;
+    }    
+}
