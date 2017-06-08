@@ -1,11 +1,14 @@
 function checkSquares(movesList){
-    squaresEval = ProcessSquares(movesList,true);
+    squaresEval = ProcessSquares(movesList);
     done= squaresEval.foundSquare;
     for (pos of squaresEval.wins){
 	pieceAt(pos).win=true;
     }
     for (pos of squaresEval.checks){
 	pieceAt(pos).check=true;
+    }   
+    if (movesList.length >= curDimension*curDimension){
+	done=true;
     }
 }
 
@@ -82,10 +85,10 @@ function ProcessSquare(pos1,pos2,side,moveBoard,color){
 	    squareEval.foundSquare = true;
 	    return squareEval;
 	}
-	else if (p3good) {
+	else if (p3good && moveBoard[pos4[0]][pos4[1]]==0) {	    
 	    squareEval.checks.push(pos4)
         }
-	else if (p4good) {
+	else if (p4good && moveBoard[pos3[0]][pos3[1]]==0) {
 	    squareEval.checks.push(pos3)
         }
     }
@@ -98,10 +101,10 @@ function ProcessSquare(pos1,pos2,side,moveBoard,color){
 	    squareEval.foundSquare = true;
 	    return squareEval;
 	}
-	else if (p5good) {
+	else if (p5good && moveBoard[pos6[0]][pos6[1]]==0) {
             squareEval.checks.push(pos6);
         }
-	else if (p6good) {
+	else if (p6good && moveBoard[pos5[0]][pos5[1]]==0) {
 	    squareEval.checks.push(pos5);
         }
     }

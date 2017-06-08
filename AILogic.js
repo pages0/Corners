@@ -16,29 +16,33 @@ function AIMove(){
 
 function AIMoveSearch(board,moves,curDimension,AIColor)
 {
-    var moveBoard = []
-    for (var i=0; i<curDimension;i++){
-	var row =[];
-	for (var j=0; j<curDimension;j++){
-	    row.push(0);
-	}
-	moveBoard.push(row);
-    }
-    for (var move of moves){
-	if(move.color)
+    var moveBoard = generateMoveBoard(moves);
+    var squaresEval = ProcessSquares(moves);
+    var move;
+    if(squaresEval.checks.length>0){
+	for (pos of squaresEval.checks)
 	{
-	    moveBoard[move.x][move.y]=1;
+	    if (moveBoard[pos[0]][pos[1]]==0){
+		move ={x:pos[0],y:pos[1],color:AIColor};
+		return move;
+	    }
 	}
-	else
-	{
-	    moveBoard[move.x][move.y]=-1;
-	}	
     }
-
-    for (var i =0; i < curDimension; i++){
-	for (var j =0; j <curDimension; j++){	    
-	    if( moveBoard[i][j]==0){
-		return {x:i, y:j, color:AIColor};
+    if (squaresEval.corners.length>0){
+	for (pos of squaresEval.corners)
+	{
+	    if (moveBoard[pos[0]][pos[1]]==0){
+		move ={x:pos[0],y:pos[1],color:AIColor};
+		return move;
+	    }
+	}
+    }
+    else{
+	for (var i =0; i < curDimension; i++){
+	    for (var j =0; j <curDimension; j++){	    
+		if( moveBoard[i][j]==0){
+		    return {x:i, y:j, color:AIColor};
+		}
 	    }
 	}
     }
