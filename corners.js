@@ -1,48 +1,62 @@
-function checkSquares(){
-    var moveBoard = []
-    for (var i=0; i<curDimension;i++){
-	var row =[];
-	for (var j=0; j<curDimension;j++){
-	    row.push(0);
-	}
-	moveBoard.push(row);
+function checkSquares(movesList){
+    squaresEval = ProcessSquares(movesList,true);
+    done= squaresEval.foundSquare;
+    for (pos of squaresEval.wins){
+	pieceAt(pos).win=true;
     }
-    for (var move of moves){
-	if(move.color)
-	{
-	    moveBoard[move.x][move.y]=1;
-	}
-	else
-	{
-	    moveBoard[move.x][move.y]=-1;
-	}	
+    for (pos of squaresEval.checks){
+	pieceAt(pos).check=true;
     }
-    
-    var foundSquare=false;
-    for (var i=0; i < moves.length && !foundSquare; i++){
-	var corner1 =moves[i];
-	for (var j=i+1; j <moves.length && !foundSquare;j++){
-	    var corner2 = moves[j];
+}
+
+function ProcessSquares(movesList){
+    var squaresEval = {foundSquare:false,corners:[],checks:[],wins:[]};
+    var moveBoard = generateMoveBoard(movesList);
+       
+    for (var i=0; i < movesList.length && !squaresEval.foundSquare; i++){
+	var corner1 =movesList[i];
+	for (var j=i+1; j <movesList.length && !squaresEval.foundSquare;j++){
+	    var corner2 = movesList[j];
 	    if (corner1.color == corner2.color){
 		side = [corner1.x-corner2.x,
 			corner1.y-corner2.y]
 		if(corner2.color && sideLongEnough(side)){
-		    foundSquare |= checkSquare([corner1.x,corner1.y],
+		    squareEval = ProcessSquare([corner1.x,corner1.y],
 					       [corner2.x,corner2.y],
 					       side,moveBoard,1);
+		    squaresEval.corners=
+			squaresEval.corners.concat(squareEval.corners);
+		    squaresEval.checks=
+			squaresEval.checks.concat(squareEval.checks);
+		    squaresEval.wins.concat(squareEval.wins);
+		    squaresEval.wins=
+			squaresEval.wins.concat(squareEval.wins);
+		    squaresEval.foundSquare |= squareEval.foundSquare;;
 		}
 		else if (sideLongEnough(side)){
-		    foundSquare |= checkSquare([corner1.x,corner1.y],
-					       [corner2.x,corner2.y],
+		    squareEval = ProcessSquare([corner1.x,corner1.y],
+					 [corner2.x,corner2.y],
 					       side,moveBoard,-1);
+		    squaresEval.corners=
+			squaresEval.corners.concat(squareEval.corners);
+		    squaresEval.checks=
+			squaresEval.checks.concat(squareEval.checks);
+		    squaresEval.wins.concat(squareEval.wins);
+		    squaresEval.wins=
+			squaresEval.wins.concat(squareEval.wins);
+		    squaresEval.foundSquare |= squareEval.foundSquare;
+		    squaresEval.corners.concat(squareEval.corners);
+		    squaresEval.checks.concat(squareEval.checks);
+		    squaresEval.wins.concat(squareEval.wins);
 		}
 	    }
 	}
     }
-    done = foundSquare;
+    return squaresEval;
 }
 
-function checkSquare(pos1,pos2,side,moveBoard,color){    
+function ProcessSquare(pos1,pos2,side,moveBoard,color){
+    var squareEval = {foundSquare:false,corners:[],checks:[],wins:[]};
     var pos3 = [pos1[0]+side[1],pos1[1]-side[0]];
     var pos4 = [pos2[0]+side[1],pos2[1]-side[0]];
     var pos5 = [pos1[0]-side[1],pos1[1]+side[0]];
@@ -61,35 +75,37 @@ function checkSquare(pos1,pos2,side,moveBoard,color){
     var p6good = p6exists && moveBoard[pos6[0]][pos6[1]] == color;
     if(p3exists && p4exists){
         if (p3good && p4good) {
-            pieceAt(pos1).win = true;
-            pieceAt(pos2).win = true;
-            pieceAt(pos3).win = true;
-            pieceAt(pos4).win = true;
-	    return true;
+            squareEval.wins.push(pos1);
+            squareEval.wins.push(pos2);
+	    squareEval.wins.push(pos3);
+	    squareEval.wins.push(pos4);	    
+	    squareEval.foundSquare = true;
+	    return squareEval;
 	}
 	else if (p3good) {
-            pieceAt(pos4).check = true;
+	    squareEval.checks.push(pos4)
         }
 	else if (p4good) {
-            pieceAt(pos3).check = true;
+	    squareEval.checks.push(pos3)
         }
     }
     if(p5exists && p6exists){
 	if (p5good && p6good) {
-            pieceAt(pos1).win = true;
-            pieceAt(pos2).win = true;
-            pieceAt(pos5).win = true;
-            pieceAt(pos6).win = true;
-	    return true;
+	    squareEval.wins.push(pos1);
+            squareEval.wins.push(pos2);
+	    squareEval.wins.push(pos5);
+	    squareEval.wins.push(pos6);
+	    squareEval.foundSquare = true;
+	    return squareEval;
 	}
 	else if (p5good) {
-            pieceAt(pos6).check = true;
+            squareEval.checks.push(pos6);
         }
 	else if (p6good) {
-            pieceAt(pos5).check = true;
+	    squareEval.checks.push(pos5);
         }
     }
-    return false;
+    return squareEval;
 }
 
 function pieceAt(pos) {
@@ -109,18 +125,27 @@ function sideLongEnough(side){
 }
 
 
-function AIMove(){
-    if (AIColor == whiteTurn && !done)
-    {
-	var move = AIMoveSearch(board,moves,curDimension,AIColor);
-	pieceAt([move.x,move.y]).moveId =moves.length;
-	moves.push(move);
-	if (AIColor){
-	    pieceAt([move.x,move.y]).piece ="white"
+
+function generateMoveBoard(moves){
+    var moveBoard = []
+    for (var i=0; i<curDimension;i++){
+	var row =[];
+	for (var j=0; j<curDimension;j++){
+	    row.push(0);
 	}
-	else{
-	    pieceAt([move.x,move.y]).piece ="black"
+	moveBoard.push(row);
+    }
+    for (var move of moves){
+	if(move.color)
+	{
+	    moveBoard[move.x][move.y]=1;
 	}
-	whiteTurn = !whiteTurn;
-    }    
+	else
+	{
+	    moveBoard[move.x][move.y]=-1;
+	}	
+    }
+
+    return moveBoard;
 }
+			   

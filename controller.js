@@ -17,8 +17,8 @@ var rules = ["any size", "not all touching", "no touching"];
 var curDimension=5;
 var nextDimension=5;
 
-var currentRule = 0;
-var nextRule =0;
+var currentRule = 1;
+var nextRule =1;
 
 /*Setup the game */
 displayGame(curDimension);
@@ -166,28 +166,7 @@ function displayPieces(svg){
 	.attr('r',0.4*squareSize)
 	.style('fill','green')
 	.attr('id',function(d){return "circle"+d.x+"-"+d.y;})
-	.on('click',function(d){
-	    //Player Move
-	    if (d.piece=="empty" && !done){
-		d.moveId = moves.length;
-		if(whiteTurn){
-		    d.piece ="white";
-		    moves.push({x:d.x,y:d.y,color:true});
-		}
-		else{
-		    d.piece ="black";
-		    moves.push({x:d.x,y:d.y,color:false});
-		}
-		whiteTurn = !whiteTurn;
-		checkSquares();
-		//AI move Here
-		if (playAI){
-		    AIMove();
-		}
-		checkSquares();
-		updateBoard();
-	    }
-	});
+	.on('click', playerMove);
 }
 
 function displayPieceNums(svg){
@@ -200,4 +179,26 @@ function displayPieceNums(svg){
 	.attr('text-anchor', 'middle')
 	.attr('dominant-baseline', 'middle')
 	.attr('id',function(d){return "text"+d.x+"-"+d.y;});
+}
+
+function playerMove(d) {
+    if (d.piece=="empty" && !done){
+	d.moveId = moves.length;
+	if(whiteTurn){
+	    d.piece ="white";
+	    moves.push({x:d.x,y:d.y,color:true});
+	}
+	else{
+	    d.piece ="black";
+	    moves.push({x:d.x,y:d.y,color:false});
+	}
+	whiteTurn = !whiteTurn;
+	checkSquares(moves);
+	//AI move Here
+	if (playAI){
+	    AIMove();
+	}
+	checkSquares(moves);
+	updateBoard();
+    }
 }

@@ -21,7 +21,7 @@ function undo()
     }
     
     done =false;
-    checkSquares();
+    checkSquares(moves);
     updateBoard();
 }
 
