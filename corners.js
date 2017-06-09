@@ -7,13 +7,15 @@ function checkSquares(movesList){
     for (pos of squaresEval.checks){
 	pieceAt(pos).check=true;
     }   
-    if (movesList.length >= curDimension*curDimension){
+    if (movesList.length >= curDimension*curDimension)
+    {
 	done=true;
     }
 }
 
 function ProcessSquares(movesList){
-    var squaresEval = {foundSquare:false,corners:[],checks:[],wins:[]};
+    var squaresEval = {foundSquare:false,corners:[],checks:[],
+		       wins:[],whiteTempo:false, blackTempo:true};
     var moveBoard = generateMoveBoard(movesList);
        
     for (var i=0; i < movesList.length && !squaresEval.foundSquare; i++){
@@ -27,6 +29,8 @@ function ProcessSquares(movesList){
 		    squareEval = ProcessSquare([corner1.x,corner1.y],
 					       [corner2.x,corner2.y],
 					       side,moveBoard,1);
+		    squaresEval.whiteTempo |= squareEval.whiteTempo;
+		    squaresEval.blackTempo |= squareEval.blackTempo;
 		    squaresEval.corners=
 			squaresEval.corners.concat(squareEval.corners);
 		    squaresEval.checks=
@@ -59,7 +63,8 @@ function ProcessSquares(movesList){
 }
 
 function ProcessSquare(pos1,pos2,side,moveBoard,color){
-    var squareEval = {foundSquare:false,corners:[],checks:[],wins:[]};
+    var squareEval = {foundSquare:false,corners:[],checks:[],
+		      wins:[],whiteTemp:false,blackTempo:false};
     var pos3 = [pos1[0]+side[1],pos1[1]-side[0]];
     var pos4 = [pos2[0]+side[1],pos2[1]-side[0]];
     var pos5 = [pos1[0]-side[1],pos1[1]+side[0]];
@@ -86,10 +91,14 @@ function ProcessSquare(pos1,pos2,side,moveBoard,color){
 	    return squareEval;
 	}
 	else if (p3good && moveBoard[pos4[0]][pos4[1]]==0) {	    
-	    squareEval.checks.push(pos4)
+	    squareEval.checks.push(pos4);
+	    if(color ==1){ squareEval.whiteTemp=true;}
+	    else{ squareEval.blackTemp=true; }
         }
 	else if (p4good && moveBoard[pos3[0]][pos3[1]]==0) {
-	    squareEval.checks.push(pos3)
+	    squareEval.checks.push(pos3);
+	    if(color ==1){ squareEval.whiteTemp=true;}
+	    else{ squareEval.blackTemp=true; }
         }
     }
     if(p5exists && p6exists){
@@ -103,9 +112,13 @@ function ProcessSquare(pos1,pos2,side,moveBoard,color){
 	}
 	else if (p5good && moveBoard[pos6[0]][pos6[1]]==0) {
             squareEval.checks.push(pos6);
+	    if(color ==1){ squareEval.whiteTemp=true;}
+	    else{ squareEval.blackTemp=true; }
         }
 	else if (p6good && moveBoard[pos5[0]][pos5[1]]==0) {
 	    squareEval.checks.push(pos5);
+	    if(color ==1){ squareEval.whiteTemp=true;}
+	    else{ squareEval.blackTemp=true; }
         }
     }
     return squareEval;

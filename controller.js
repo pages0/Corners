@@ -194,6 +194,7 @@ function playerMove(d) {
 	}
 	whiteTurn = !whiteTurn;
 	checkSquares(moves);
+	updateBoard();
 	//AI move Here
 	if (playAI){
 	    AIMove();
